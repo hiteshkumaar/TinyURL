@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const db = require('./db');
+const cors = require("cors")
 const validUrl = require('valid-url');
 const { customAlphabet } = require('nanoid');
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
