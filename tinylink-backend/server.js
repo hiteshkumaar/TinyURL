@@ -106,6 +106,7 @@ app.delete('/api/links/:code', async (req, res) => {
 // redirect endpoint - must be last (so /api routes don't intercept)
 app.get('/:code', async (req, res) => {
   const code = req.params.code;
+  const trackOnly = req.query.track === '1';
   try {
     const { rows } = await db.query('SELECT url, deleted FROM short_links WHERE code=$1', [code]);
     if (rows.length === 0 || rows[0].deleted) return res.status(404).send('Not found');
@@ -113,7 +114,11 @@ app.get('/:code', async (req, res) => {
     const url = rows[0].url;
     // increment clicks & update last_clicked
     await db.query('UPDATE short_links SET clicks = clicks + 1, last_clicked = now() WHERE code=$1', [code]);
-
+    
+    if (trackOnly) {
+      // ← DO NOT REDIRECT
+      return res.json({ ok: true });
+    }
     // 302 redirect
     res.redirect(302, url);
   } catch (err) {
